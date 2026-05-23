@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Texel LIVE</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #e8f4f8;
+    --dune: #f5efe0;
+    --sea: #2a7fa5;
+    --sea-light: #5ab0d0;
+    --sea-dark: #1a5570;
+    --sand: #c8a96e;
+    --grass: #5a8a4a;
+    --woody: #7a4a2a;
+    --woody-light: #c87a4a;
+    --text-dark: #1a2a35;
+    --text-mid: #4a6a7a;
+    --text-light: #8ab0c0;
+    --card-bg: rgba(255,255,255,0.85);
+    --glow: rgba(42,127,165,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: linear-gradient(180deg, #cce8f5 0%, #e8f4f8 30%, #f0ede5 100%);
+    min-height: 100vh;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 空と海の背景 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 70% 10%, rgba(255,255,255,0.6) 0%, transparent 50%),
+      radial-gradient(ellipse at 20% 80%, rgba(200,169,110,0.2) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 波アニメーション */
+  .waves {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    opacity: 0.3;
+  }
+
+  .wave {
+    position: absolute;
+    bottom: 0;
+    left: -100%;
+    width: 300%;
+    height: 60px;
+    background: var(--sea-light);
+    border-radius: 50% 50% 0 0;
+    animation: wave linear infinite;
+  }
+
+  .wave:nth-child(1) { animation-duration: 8s; opacity: 0.6; }
+  .wave:nth-child(2) { animation-duration: 12s; animation-delay: -4s; opacity: 0.4; bottom: 10px; }
+  .wave:nth-child(3) { animation-duration: 16s; animation-delay: -8s; opacity: 0.3; bottom: 20px; }
+
+  @keyframes wave {
+    from { transform: translateX(0); }
+    to { transform: translateX(33.3%); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 16px 80px;
+  }
+
+  /* ヘッダー */
+  header {
+    text-align: center;
+    padding: 36px 0 28px;
+  }
+
+  .logo-area {
+    font-size: 48px;
+    display: block;
+    animation: bob 4s ease-in-out infinite;
+    filter: drop-shadow(0 4px 12px rgba(42,127,165,0.3));
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  h1 {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    color: var(--sea-dark);
+    margin-top: 10px;
+    letter-spacing: 0.08em;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: var(--text-mid);
+    margin-top: 5px;
+    letter-spacing: 0.1em;
+  }
+
+  /* セクション */
+  .section { margin-top: 24px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .section-header.texel-header {
+    background: linear-gradient(135deg, var(--sea-dark), var(--sea));
+  }
+
+  .section-header.woody-header {
+    background: linear-gradient(135deg, var(--woody), var(--woody-light));
+  }
+
+  .section-header.ecomare-header {
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+  }
+
+  .section-icon { font-size: 24px; }
+
+  .section-title {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    color: white;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .section-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.05em;
+  }
+
+  /* カード */
+  .cards { display: flex; flex-direction: column; gap: 8px; }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid rgba(42,127,165,0.15);
+    border-radius: 14px;
+    padding: 13px 14px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    -webkit-tap-highlight-color: transparent;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .card:active {
+    transform: scale(0.97);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.95);
+  }
+
+  .card-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  /* セクション別アイコン背景 */
+  .texel-card .card-icon { background: linear-gradient(135deg, #d0eaf5, #b0d8ee); }
+  .ecomare-card .card-icon { background: linear-gradient(135deg, #d0e8f5, #a0c8e8); }
+  .woody-cat .card-icon { background: linear-gradient(135deg, #fde8d8, #f5c8a8); }
+  .woody-dog .card-icon { background: linear-gradient(135deg, #d8ecd8, #b0d8b0); }
+
+  .card-text { flex: 1; min-width: 0; }
+
+  .card-name {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    line-height: 1.3;
+  }
+
+  .card-desc {
+    font-size: 11px;
+    color: var(--text-mid);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  .card-arrow {
+    color: var(--text-light);
+    font-size: 18px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+
+  .card:active .card-arrow { transform: translateX(3px); color: var(--sea); }
+
+  /* バッジ */
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: #e74c3c;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    animation: pulse-badge 2s ease-in-out infinite;
+    white-space: nowrap;
+  }
+
+  .live-dot {
+    width: 4px; height: 4px;
+    background: white;
+    border-radius: 50%;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+
+  .underwater-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(42,127,165,0.15);
+    border: 1px solid rgba(42,127,165,0.3);
+    color: var(--sea-dark);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.3); }
+    50% { box-shadow: 0 0 0 3px rgba(231,76,60,0); }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 区切り線 */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(42,127,165,0.2), transparent);
+    margin: 20px 0 0;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 32px;
+    color: var(--text-light);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<div class="waves">
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+</div>
+
+<div class="container">
+  <header>
+    <span class="logo-area">🏝️</span>
+    <h1>Texel LIVE</h1>
+    <p class="subtitle">テクセル島 ライブカメラまとめ・オランダ</p>
+  </header>
+
+  <!-- ecomare アザラシ -->
+  <div class="section">
+    <div class="section-header ecomare-header">
+      <span class="section-icon">🦭</span>
+      <span class="section-title">ecomare アザラシ</span>
+      <span class="section-count">4カメラ</span>
+    </div>
+    <div class="cards">
+      <a class="card ecomare-card" href="https://www.youtube.com/live/6nQgzl3jXY4?si=2zNRDiGp4A1-0e8I" target="_blank" rel="noopener" style="animation-delay:0.05s">
+        <div class="card-icon">🦭</div>
+        <div class="card-text">
+          <div class="card-name">女子プール <span class="live-badge"><span class="live-dot"></span>4K</span></div>
+          <div class="card-desc">Rianne・Jonna・Daan・Saelma・Sille・Karien</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card ecomare-card" href="https://www.youtube.com/live/sg-J_5KC8ZU?si=e6KW5aQQ_VVRJRX-" target="_blank" rel="noopener" style="animation-delay:0.10s">
+        <div class="card-icon">💧</div>
+        <div class="card-text">
+          <div class="card-name">男子プール <span class="live-badge"><span class="live-dot"></span>4K</span> <span class="underwater-badge">🤿 水中</span></div>
+          <div class="card-desc">Bob・Rob・Lodde・Antonius</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card ecomare-card" href="https://www.youtube.com/live/YLScvmJDY2o?si=h1n5cqJYcZ6uQgtr" target="_blank" rel="noopener" style="animation-delay:0.15s">
+        <div class="card-icon">🌊</div>
+        <div class="card-text">
+          <div class="card-name">アザラシプール <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">TexelInformatie カメラ・給餌 11:00 & 15:30</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card ecomare-card" href="https://www.youtube.com/live/T0xCKL_IXgk?si=4LZgImiuLxf4UBba" target="_blank" rel="noopener" style="animation-delay:0.20s">
+        <div class="card-icon">🫧</div>
+        <div class="card-text">
+          <div class="card-name">アザラシ水中 <span class="live-badge"><span class="live-dot"></span>LIVE</span> <span class="underwater-badge">🤿 水中</span></div>
+          <div class="card-desc">TexelInformatie 水中カメラ</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Woody's 動物保護施設 -->
+  <div class="section">
+    <div class="section-header woody-header">
+      <span class="section-icon">🐾</span>
+      <span class="section-title">Woody's Veilige Haven</span>
+      <span class="section-count">6カメラ</span>
+    </div>
+    <div class="cards">
+      <a class="card woody-cat" href="https://www.youtube.com/live/R8MRTG0pYdc?si=K8H5tt7cFdfwItsh" target="_blank" rel="noopener" style="animation-delay:0.25s">
+        <div class="card-icon">🐱</div>
+        <div class="card-text">
+          <div class="card-name">猫・室内 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">リビングルーム・猫の保護施設</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card woody-cat" href="https://www.youtube.com/live/oiB-6hG5970?si=nLCfvYTaqSEx7CwD" target="_blank" rel="noopener" style="animation-delay:0.30s">
+        <div class="card-icon">🐈</div>
+        <div class="card-text">
+          <div class="card-name">猫・テラス <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">屋外テラスでくつろぐ猫たち</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card woody-cat" href="https://www.youtube.com/live/x38rP23ZnWM?si=E40lAELLDm-YZe86" target="_blank" rel="noopener" style="animation-delay:0.35s">
+        <div class="card-icon">🌿</div>
+        <div class="card-text">
+          <div class="card-name">猫・庭 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">お庭でのびのびする猫たち</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card woody-dog" href="https://www.youtube.com/live/xiJgIk6J3hc?si=lpZQg7ItfugYra_M" target="_blank" rel="noopener" style="animation-delay:0.40s">
+        <div class="card-icon">🐶</div>
+        <div class="card-text">
+          <div class="card-name">犬エリア <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">保護犬たちの遊び場</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card woody-cat" href="https://www.youtube.com/live/lpp-rJg0uAg?si=BeVG-ZcWiPBHw7G6" target="_blank" rel="noopener" style="animation-delay:0.45s">
+        <div class="card-icon">🏠</div>
+        <div class="card-text">
+          <div class="card-name">猫保護室・室内 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">TexelInformatie カメラ・猫の保護室</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card woody-cat" href="https://www.youtube.com/live/NF6DzpvWWUU?si=pQr55B6F9zzMZqQZ" target="_blank" rel="noopener" style="animation-delay:0.50s">
+        <div class="card-icon">☀️</div>
+        <div class="card-text">
+          <div class="card-name">猫保護室・屋外 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">TexelInformatie カメラ・外遊び場</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- テクセル島ライブカメラ -->
+  <div class="section">
+    <div class="section-header texel-header">
+      <span class="section-icon">🌊</span>
+      <span class="section-title">テクセル島 ライブカメラ</span>
+      <span class="section-count">13カメラ</span>
+    </div>
+    <div class="cards">
+      <a class="card texel-card" href="https://www.youtube.com/live/0KAaRLr6d2M?si=zQH7xrcMztnl7W50" target="_blank" rel="noopener" style="animation-delay:0.57s">
+        <div class="card-icon">🐑</div>
+        <div class="card-text">
+          <div class="card-name">羊牧場 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">Schapenboerderij Texel・子羊たち</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/Di4WiSTX1oY?si=ZDiyqeh_XRcokwfP" target="_blank" rel="noopener" style="animation-delay:0.58s">
+        <div class="card-icon">🔭</div>
+        <div class="card-text">
+          <div class="card-name">De Koog パノラマ <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">最高峰の砂丘から・ビーチ・砂丘・北海の全景</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/Hq2Qbcuph4w?si=26C2bxVu65fwZEhz" target="_blank" rel="noopener" style="animation-delay:0.60s">
+        <div class="card-icon">🏖️</div>
+        <div class="card-text">
+          <div class="card-name">Paal 17 ビーチ <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">De Koog・北海ビーチ＆イベント会場</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/JHSeVkq5ikE?si=08Oqcv8nc7em_FgU" target="_blank" rel="noopener" style="animation-delay:0.63s">
+        <div class="card-icon">🍹</div>
+        <div class="card-text">
+          <div class="card-name">Club 17 ビーチクラブ <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">Paal 17・ラウンジ＆ビーチの雰囲気</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/f_CtUNq1FR0?si=Cl3PorpDBcQZj_d2" target="_blank" rel="noopener" style="animation-delay:0.66s">
+        <div class="card-icon">🦭</div>
+        <div class="card-text">
+          <div class="card-name">Paal 20 ビーチ <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">De Dikke Zeehond（太ったアザラシ）前の浜</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/YIefLlsHUVQ?si=zr5rEVKcERrGWmUz" target="_blank" rel="noopener" style="animation-delay:0.69s">
+        <div class="card-icon">🏄</div>
+        <div class="card-text">
+          <div class="card-name">Paal 9 サーフカム <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">カイトサーフ・ウィンドサーフの波チェック</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/Gq8dWezdEX8?si=wMI6GrKTkGgDgv5p" target="_blank" rel="noopener" style="animation-delay:0.72s">
+        <div class="card-icon">🗺️</div>
+        <div class="card-text">
+          <div class="card-name">Kaap Noord 最北端 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">Paal 33・ワッデン海と北海の合流点</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/NYGtSbvt6d0?si=V4oO6GooNhmaRQ1K" target="_blank" rel="noopener" style="animation-delay:0.75s">
+        <div class="card-icon">🐟</div>
+        <div class="card-text">
+          <div class="card-name">Oudeschild 漁港 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">漁船が行き交う活気ある港</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/8CNNMagWIS4?si=KQG_2ebNjlCeDAcJ" target="_blank" rel="noopener" style="animation-delay:0.78s">
+        <div class="card-icon">⛵</div>
+        <div class="card-text">
+          <div class="card-name">Oudeschild 港口 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">ワッデン海への出入り口・De Kombuis前</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/U8m7Fr6xMqM?si=S6zubGS5cW3AsPMq" target="_blank" rel="noopener" style="animation-delay:0.81s">
+        <div class="card-icon">🚢</div>
+        <div class="card-text">
+          <div class="card-name">TESO フェリー港 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">デン・ヘルダー発・テクセル行きフェリー</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/ajX5wOMF8ss?si=XMF9ImRTpmudnZt0" target="_blank" rel="noopener" style="animation-delay:0.84s">
+        <div class="card-icon">🗼</div>
+        <div class="card-text">
+          <div class="card-name">赤い灯台 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">De Cocksdorp・テクセルのシンボル</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/jKcaVPyz2ac?si=5iPoLbBc8ITZicpt" target="_blank" rel="noopener" style="animation-delay:0.87s">
+        <div class="card-icon">⛳</div>
+        <div class="card-text">
+          <div class="card-name">ゴルフ場 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">De Texelse・砂丘のリンクスコース</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+      <a class="card texel-card" href="https://www.youtube.com/live/fwwiABdfa_A?si=XFdnU6NwO1uhW0x8" target="_blank" rel="noopener" style="animation-delay:0.90s">
+        <div class="card-icon">🌾</div>
+        <div class="card-text">
+          <div class="card-name">Waal en Burg 自然保護区 <span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
+          <div class="card-desc">野鳥の宝庫・のどかな田園風景</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </a>
+    </div>
+  </div>
+
+  <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(42,127,165,0.2),transparent);margin-top:24px;"></div>
+  <footer>tap to jump · 🏝️ · Texel Island · Netherlands</footer>
+</div>
+
+</body>
+</html>
